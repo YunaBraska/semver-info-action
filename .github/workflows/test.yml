@@ -1,0 +1,61 @@
+name: "TEST"
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+    steps:
+      - name: "Validate Input"
+        id: "inputs"
+        run: |
+          if [ "$GITHUB_ACTOR" != "YunaBraska" ]; then echo "Permission denied for user [$GITHUB_ACTOR]"; exit 1; fi
+          has_publish_to_code_climate=$(if [[ "${{secrets.CC_TEST_REPORTER_ID}}" == "" ]]; then echo "false"; else echo "true"; fi)
+          echo "has_publish_to_code_climate [$has_publish_to_code_climate]"
+          echo "has_publish_to_code_climate=$has_publish_to_code_climate" >> $GITHUB_OUTPUT
+          echo "--------------------- ENVS ---------------------"
+          env
+      - name: "Checkout"
+        uses: actions/checkout@main
+      - name: "Setup Node"
+        uses: actions/setup-node@main
+        with:
+          node-version: "16"
+          cache: npm
+      - name: "update dependencies"
+        run: |
+          npm outdated || true 
+          npm update --save
+          npm audit fix --force
+      - name: "Run Tests"
+        run: |
+          npm ci && npm run test:coverage
+      - name: "Read Semver Info"
+        id: "semver_info"
+        uses: YunaBraska/semver-info-action@main
+        with:
+          semver-a: 'v1.2.3-rc.4'
+          semver-b: 'v5.6.7-rc.8'
+          fallBack-semver-a: '0.0.1'
+          fallBack-semver-b: '0.0.1'
+      - name: "Print Semver Info"
+        run: |
+          echo "clean_semver         [${{ steps.semver_info.outputs.clean_semver }}]"
+          echo "is_stable            [${{ steps.semver_info.outputs.is_stable }}]"
+          echo "is_valid_semver      [${{ steps.semver_info.outputs.is_valid_semver }}]"
+          echo "is_major_change      [${{ steps.semver_info.outputs.is_major_change }}]"
+          echo "is_a_greater_than_b  [${{ steps.semver_info.outputs.is_greater_a }}]"
+          echo "next_major           [${{ steps.semver_info.outputs.next_major }}]"
+          echo "next_major_a         [${{ steps.semver_info.outputs.next_major_a }}]"
+          echo "next_major_b         [${{ steps.semver_info.outputs.next_major_b }}]"
+          echo "next_minor           [${{ steps.semver_info.outputs.next_minor }}]"
+          echo "next_patch           [${{ steps.semver_info.outputs.next_patch }}]"
+          echo "next_rc              [${{ steps.semver_info.outputs.next_rc }}]"
+          if [ "${{ steps.semver_info.outputs.is_greater_a }}" != "false" ]; then echo "Unexpected validation result [${{ steps.semver_info.outputs.is_greater_a }}] should have been false"; exit 1; fi
