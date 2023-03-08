@@ -17,11 +17,11 @@ inputs:
     description: 'The fallback version B in case version B is not valid'
     required: false
     default: ''
-  increase-semver-a:
+  increase-a:
     description: 'Increase version A before processing [major, minor, patch, rc]'
     required: false
     default: ''
-  increase-semver-b:
+  increase-b:
     description: 'Increase version B before processing [major, minor, patch, rc]'
     required: false
     default: ''
@@ -55,11 +55,11 @@ outputs:
   is_valid_semver_b:
     description: 'Whether semver B is valid'
   is_stable:
-    description: 'Whether the version is stable (doesn't contain any pre-release tag) (highest semver wins)'
+    description: 'Whether the version is stable (doesn`t contain any pre-release tag) (highest semver wins)'
   is_stable_a:
-    description: 'Whether version A is stable (doesn't contain any pre-release tag)'
+    description: 'Whether version A is stable (doesn`t contain any pre-release tag)'
   is_stable_b:
-    description: 'Whether version B is stable (doesn't contain any pre-release tag)'
+    description: 'Whether version B is stable (doesn`t contain any pre-release tag)'
   major:
     description: 'The major version of provided semver (highest semver wins)'
   major_a:

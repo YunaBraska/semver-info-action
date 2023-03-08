@@ -1,4 +1,13 @@
 //https://github.com/actions/toolkit/tree/main/packages/
+const S_MAJOR_1 = 'major';
+const S_MAJOR_2 = 'premajor';
+const S_MINOR_1 = 'minor';
+const S_MINOR_2 = 'preminor';
+const S_PATCH_1 = 'patch';
+const S_PATCH_2 = 'prpatch';
+const S_RC_1 = 'rc';
+const S_RC_2 = 'prerelease';
+
 const semver = require('semver')
 const core = require('@actions/core');
 type ResultType = string | number | boolean | null;
@@ -26,15 +35,6 @@ try {
         core.setFailed(e.message);
     }
 }
-
-const S_MAJOR_1 = 'major';
-const S_MAJOR_2 = 'premajor';
-const S_MINOR_1 = 'minor';
-const S_MINOR_2 = 'preminor';
-const S_PATCH_1 = 'patch';
-const S_PATCH_2 = 'prpatch';
-const S_RC_1 = 'rc';
-const S_RC_2 = 'prerelease';
 
 function run(orgSemverA: string, orgSemverB: string, fallBackSemverA: string, fallBackSemverB: string, increaseA: string, increaseB: string): Map<string, ResultType> {
     //DEFAULTS
