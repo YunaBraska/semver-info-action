@@ -30,6 +30,8 @@ compatibility, making software release management a breeze!
     semver-b: 'v5.6.7-rc.8'
     fallBack-semver-a: '0.0.1'
     fallBack-semver-b: '0.0.1'
+    increase-a: 'none'
+    increase-b: 'none'
 
   # PRINT
 - name: "Print Semver Info"
@@ -56,8 +58,8 @@ compatibility, making software release management a breeze!
 | semver-b          | v5.6.7-rc.8 | null    | Semver B to process - will be compared against the first semver |
 | fallBack-semver-a | 0.0.1       | null    | The fallback version A in case version A is not valid           |
 | fallBack-semver-b | 0.0.1       | null    | The fallback version B in case version B is not valid           |
-| increase-semver-a | major       | null    | Increase version A before processing \[major, minor, patch, rc] |
-| increase-semver-b | patch       | null    | Increase version B before processing \[major, minor, patch, rc] |
+| increase-a        | major       | null    | Increase version A before processing \[major, minor, patch, rc] |
+| increase-b        | patch       | null    | Increase version B before processing \[major, minor, patch, rc] |
 
 ### Outputs
 
