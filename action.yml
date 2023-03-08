@@ -1,0 +1,130 @@
+name: 'Semver Info Action'
+description: 'Cleans, parses, and compares semantic versions, providing essential insights into versioning, stability, and compatibility, making software release management a breeze!'
+inputs:
+  semver-a:
+    description: 'Semver A to process'
+    required: false
+    default: ''
+  semver-b:
+    description: 'Semver B to process - will be compared against the first semver'
+    required: false
+    default: ''
+  fallBack-semver-a:
+    description: 'The fallback version A in case version A is not valid'
+    required: false
+    default: ''
+  fallBack-semver-b:
+    description: 'The fallback version B in case version B is not valid'
+    required: false
+    default: ''
+  increase-semver-a:
+    description: 'Increase version A before processing [major, minor, patch, rc]'
+    required: false
+    default: ''
+  increase-semver-b:
+    description: 'Increase version B before processing [major, minor, patch, rc]'
+    required: false
+    default: ''
+outputs:
+  clean_semver:
+    description: 'The cleaned and normalized version without any prefix (highest semver wins)'
+  clean_semver_a:
+    description: 'The cleaned and normalized version A without any prefix'
+  clean_semver_b:
+    description: 'The cleaned and normalized version B without any prefix'
+  is_greater_a:
+    description: 'Whether A is greater than B'
+  is_smaller_a:
+    description: 'Whether A is smaller than B'
+  is_greater_b:
+    description: 'Whether B is greater than A'
+  is_smaller_b:
+    description: 'Whether B is smaller than A'
+  is_major_change:
+    description: 'If diff A and B is a major change'
+  is_minor_change:
+    description: 'If diff A and B is a minor change'
+  is_patch_change:
+    description: 'If diff A and B is a patch change'
+  is_rc_change:
+    description: 'If diff A and B is a rc (release candidate) change'
+  is_valid_semver:
+    description: 'Whether the semver is valid (highest semver wins)'
+  is_valid_semver_a:
+    description: 'Whether semver A is valid'
+  is_valid_semver_b:
+    description: 'Whether semver B is valid'
+  is_stable:
+    description: 'Whether the version is stable (doesn't contain any pre-release tag) (highest semver wins)'
+  is_stable_a:
+    description: 'Whether version A is stable (doesn't contain any pre-release tag)'
+  is_stable_b:
+    description: 'Whether version B is stable (doesn't contain any pre-release tag)'
+  major:
+    description: 'The major version of provided semver (highest semver wins)'
+  major_a:
+    description: 'The major version of A'
+  major_b:
+    description: 'The major version of B'
+  minor:
+    description: 'The minor version of provided semver (highest semver wins)'
+  minor_a:
+    description: 'The minor version of A'
+  minor_b:
+    description: 'The minor version of B'
+  patch:
+    description: 'The patch version of provided semver (highest semver wins)'
+  patch_a:
+    description: 'The patch version of A'
+  patch_b:
+    description: 'The patch version of B'
+  rc:
+    description: 'The release candidate version of provided semver (highest semver wins)'
+  rc_a:
+    description: 'The release candidate version of A'
+  rc_b:
+    description: 'The release candidate version of B'
+  rc_str:
+    description: 'The prefix of the release candidate version (highest semver wins)'
+  rc_str_a:
+    description: 'The prefix of the release candidate version of A'
+  rc_str_b:
+    description: 'The prefix of the release candidate version of B'
+  next_major:
+    description: 'The next major version of provided semver (highest semver wins)'
+  next_major_a:
+    description: 'The next major version of A'
+  next_major_b:
+    description: 'The next major version of B'
+  next_minor:
+    description: 'The next minor version of provided semver (highest semver wins)'
+  next_minor_a:
+    description: 'The next minor version of A'
+  next_minor_b:
+    description: 'The next minor version of B'
+  next_patch:
+    description: 'The next patch version of provided semver (highest semver wins)'
+  next_patch_a:
+    description: 'The next patch version of A'
+  next_patch_b:
+    description: 'The next patch version of B'
+  next_rc:
+    description: 'The next rc version of provided semver (highest semver wins)'
+  next_rc_a:
+    description: 'The next rc version of A'
+  next_rc_b:
+    description: 'The next rc version of B'
+  original-semver-a:
+    description: 'Semver A to process'
+  original-semver-b:
+    description: 'Semver B to process - will be compared with first semver'
+  fallBack-semver-a:
+    description: 'The fallback version A in case the original version A is not valid'
+  fallBack-semver-b:
+    description: 'The fallback version B in case the original version B is not valid'
+runs:
+  using: 'node16'
+  main: 'lib/index.js'
+branding:
+  icon: file-text
+  color: purple
