@@ -67,13 +67,6 @@ jobs:
       - name: "Run Tests"
         run: |
           npm ci && npm run test:coverage
-      - name: "Publish code quality"
-        uses: paambaati/codeclimate-action@v3.2.0
-        if: steps.inputs.outputs.has_publish_to_code_climate == 'true'
-        env:
-          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
-        with:
-          coverageLocations: ${{github.workspace}}/coverage/*.lcov:lcov
       - name: "Read Git Info"
         id: "git_info"
         uses: YunaBraska/git-info-action@main
@@ -90,8 +83,6 @@ jobs:
           version_file=$(find . -name "version.txt" -type f)
           version_file=${version_file:-version.txt}
           echo "${{ steps.semver_info.outputs.clean_semver }}" > ${version_file}
-      - name: "Set Version"
-        id: "semver"
       - name: "Push changes"
         if: steps.git_info.outputs.has_changes == 'true' || steps.git_info.outputs.has_local_changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@master
@@ -106,6 +97,13 @@ jobs:
           skip_checkout: true
           disable_globbing: true
           create_branch: false
+      - name: "Publish code quality"
+        uses: paambaati/codeclimate-action@v3.2.0
+        if: steps.inputs.outputs.has_publish_to_code_climate == 'true'
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+        with:
+          coverageLocations: ${{github.workspace}}/coverage/*.lcov:lcov
   tag_outputs:
     needs: "tag"
     runs-on: ubuntu-latest
