@@ -1,5 +1,5 @@
 name: 'Semver Info Action'
-description: 'Cleans, parses, and compares semantic versions, providing essential insights into versioning, stability, and compatibility, making software release management a breeze!'
+description: 'Cleans, parses, and compares semantic versions, providing essential insights into versioning, stability, and compatibility'
 inputs:
   semver-a:
     description: 'Semver A to process'
