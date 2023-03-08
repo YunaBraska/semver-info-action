@@ -91,7 +91,7 @@ jobs:
           commit_user_name: "Kira"
           commit_user_email: "kira@yuna.berlin"
           commit_author: "Kira <kira@yuna.berlin>"
-          tagging_message: ${{ steps.semver.outputs.new_version }}
+          tagging_message: ${{ steps.semver_info.outputs.clean_semver }}
           skip_dirty_check: true
           skip_fetch: true
           skip_checkout: true
