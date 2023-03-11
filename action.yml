@@ -122,6 +122,10 @@ outputs:
     description: 'The fallback version A in case the original version A is not valid'
   fallBack-semver-b:
     description: 'The fallback version B in case the original version B is not valid'
+  version_txt:
+    description: 'semver from version file'
+  version_txt_path:
+    description: 'path of version file'
 runs:
   using: 'node16'
   main: 'lib/index.js'

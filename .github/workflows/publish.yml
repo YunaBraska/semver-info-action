@@ -77,12 +77,10 @@ jobs:
           semver-a: ${{ steps.git_info.outputs.tag_latest }}
           increase-a: ${{ steps.inputs.outputs.semver_strategy }}
       - name: "Write Version.txt"
-        if: steps.git_info.outputs.has_changes == 'true' || steps.git_info.outputs.has_local_changes == 'true'
+        if: steps.semver_info.outputs.version_txt_path != '' || steps.semver_info.outputs.version_txt_path == 'null'
         run: |
           echo "version [${{ steps.semver_info.outputs.clean_semver }}]"
-          version_file=$(find . -name "version.txt" -type f)
-          version_file=${version_file:-version.txt}
-          echo "${{ steps.semver_info.outputs.clean_semver }}" > ${version_file}
+          echo "${{steps.semver_info.outputs.clean_semver}}" > "${{steps.semver_info.outputs.version_txt_path}}"
       - name: "Push changes"
         if: steps.git_info.outputs.has_changes == 'true' || steps.git_info.outputs.has_local_changes == 'true'
         uses: stefanzweifel/git-auto-commit-action@master
