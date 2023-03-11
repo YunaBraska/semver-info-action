@@ -10,6 +10,8 @@ interface FirstLineResult {
 
 export function processVersionFile(result: Map<string, ResultType2>, workDir: PathOrFileDescriptor, deep: number): Map<string, ResultType2> {
     let fileList = listFiles(workDir, deep, 'version.txt', [], 0);
+    // Sort the file list by path length
+    fileList.sort((a, b) => a.toString().length - b.toString().length);
     const firstLineResult: FirstLineResult | null = fileList
         .map(file => ({
             filePath: file,
@@ -22,8 +24,8 @@ export function processVersionFile(result: Map<string, ResultType2>, workDir: Pa
         }))
         .filter(({firstLine}) => firstLine !== null && firstLine.trim().length > 0)
         .shift() || null;
-    result.set('version_txt_path', firstLineResult !== null ? firstLineResult.filePath.toString() : null)
-    result.set('version_txt', firstLineResult !== null ? firstLineResult.firstLine : null)
+    result.set('version_txt_path', firstLineResult !== null ? firstLineResult.filePath.toString() : null);
+    result.set('version_txt', firstLineResult !== null ? firstLineResult.firstLine : null);
     return result;
 }
 

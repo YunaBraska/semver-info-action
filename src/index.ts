@@ -11,7 +11,7 @@ const S_PATCH_2 = 'prpatch';
 const S_RC_1 = 'rc';
 const S_RC_2 = 'prerelease';
 
-const semver = require('semver')
+const semver = require('semver');
 const core = require('@actions/core');
 type ResultType = string | number | boolean | null;
 
@@ -26,11 +26,11 @@ try {
 
     let result = run(workDir, semverA, semverB, fallBackSemverA, fallBackSemverB, increaseA, increaseB);
 
-    console.log(JSON.stringify(Object.fromEntries(result), null, 4))
+    console.log(JSON.stringify(Object.fromEntries(result), null, 4));
 
     result.forEach((value, key) => {
         core.setOutput(key, value);
-    })
+    });
 } catch (e) {
     if (typeof e === "string") {
         core.setFailed(e.toUpperCase());
@@ -42,7 +42,7 @@ try {
 function run(workDir: PathOrFileDescriptor, orgSemverA: string, orgSemverB: string, fallBackSemverA: string, fallBackSemverB: string, increaseA: string, increaseB: string): Map<string, ResultType> {
     //DEFAULTS
     if (!workDir || workDir === "." || !fs.existsSync(workDir.toString())) {
-        workDir = getWorkingDirectory(process.env['GITHUB_WORKSPACE']?.toString() || null)
+        workDir = getWorkingDirectory(process.env['GITHUB_WORKSPACE']?.toString() || null);
     }
     let result = new Map<string, ResultType>();
     let semverA = increaseVersion(orgSemverA || fallBackSemverA !== null ? semver.clean(orgSemverA || fallBackSemverA) : null, increaseA);
@@ -56,8 +56,8 @@ function run(workDir: PathOrFileDescriptor, orgSemverA: string, orgSemverB: stri
     //COMMONS
     processVersionFile(result, workDir, 10);
     let semverMap = new Map<string, (string | null)[]>();
-    semverMap.set('a', [semverA, semverB])
-    semverMap.set('b', [semverB, semverA])
+    semverMap.set('a', [semverA, semverB]);
+    semverMap.set('b', [semverB, semverA]);
     for (const [key, versions] of semverMap) {
         let version = versions[0];
         let version_b = versions[1];
@@ -125,10 +125,10 @@ function calcDiffs(result: Map<string, ResultType>, semverA: string | null, semv
     let versionLowPre = semver.lt(validA, validB) ? validA : validB;
     let versionLow = (!isValidA || !isValidB ? versionBig : versionLowPre);
     let diff = semver.diff(versionBig, versionLow);
-    result.set(`is_${S_MAJOR_1}_change`, diff === S_MAJOR_1 || diff === S_MAJOR_2)
-    result.set(`is_${S_MINOR_1}_change`, diff === S_MINOR_1 || diff === S_MINOR_2)
-    result.set(`is_${S_PATCH_1}_change`, diff === S_PATCH_1 || diff === S_PATCH_2)
-    result.set(`is_${S_RC_1}_change`, diff === S_RC_1 || diff === S_RC_2)
+    result.set(`is_${S_MAJOR_1}_change`, diff === S_MAJOR_1 || diff === S_MAJOR_2);
+    result.set(`is_${S_MINOR_1}_change`, diff === S_MINOR_1 || diff === S_MINOR_2);
+    result.set(`is_${S_PATCH_1}_change`, diff === S_PATCH_1 || diff === S_PATCH_2);
+    result.set(`is_${S_RC_1}_change`, diff === S_RC_1 || diff === S_RC_2);
     calcDefaults(result, '', (isValidA || isValidB ? versionBig : ''), isValidA || isValidB);
 }
 
