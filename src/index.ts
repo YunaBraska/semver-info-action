@@ -1,4 +1,7 @@
 //https://github.com/actions/toolkit/tree/main/packages/
+import {processVersionFile} from "./version_file";
+import fs, {PathOrFileDescriptor} from "fs";
+
 const S_MAJOR_1 = 'major';
 const S_MAJOR_2 = 'premajor';
 const S_MINOR_1 = 'minor';
@@ -13,6 +16,7 @@ const core = require('@actions/core');
 type ResultType = string | number | boolean | null;
 
 try {
+    let workDir = core.getInput('work-dir') || null;
     let semverA = core.getInput('semver-a') || null;
     let semverB = core.getInput('semver-b') || null;
     let fallBackSemverA = core.getInput('fallback-semver-a') || null;
@@ -20,8 +24,7 @@ try {
     let increaseA = core.getInput('increase-a') || null;
     let increaseB = core.getInput('increase-b') || null;
 
-
-    let result = run(semverA, semverB, fallBackSemverA, fallBackSemverB, increaseA, increaseB);
+    let result = run(workDir, semverA, semverB, fallBackSemverA, fallBackSemverB, increaseA, increaseB);
 
     console.log(JSON.stringify(Object.fromEntries(result), null, 4))
 
@@ -36,8 +39,11 @@ try {
     }
 }
 
-function run(orgSemverA: string, orgSemverB: string, fallBackSemverA: string, fallBackSemverB: string, increaseA: string, increaseB: string): Map<string, ResultType> {
+function run(workDir: PathOrFileDescriptor, orgSemverA: string, orgSemverB: string, fallBackSemverA: string, fallBackSemverB: string, increaseA: string, increaseB: string): Map<string, ResultType> {
     //DEFAULTS
+    if (!workDir || workDir === "." || !fs.existsSync(workDir.toString())) {
+        workDir = getWorkingDirectory(process.env['GITHUB_WORKSPACE']?.toString() || null)
+    }
     let result = new Map<string, ResultType>();
     let semverA = increaseVersion(orgSemverA || fallBackSemverA !== null ? semver.clean(orgSemverA || fallBackSemverA) : null, increaseA);
     let semverB = increaseVersion(orgSemverB || fallBackSemverB !== null ? semver.clean(orgSemverB || fallBackSemverB) : null, increaseB);
@@ -48,6 +54,7 @@ function run(orgSemverA: string, orgSemverB: string, fallBackSemverA: string, fa
     result.set('fallBack-semver-b', fallBackSemverB);
 
     //COMMONS
+    processVersionFile(result, workDir, 10);
     let semverMap = new Map<string, (string | null)[]>();
     semverMap.set('a', [semverA, semverB])
     semverMap.set('b', [semverB, semverA])
@@ -133,6 +140,10 @@ function sortMap(input: Map<string, any>): Map<string, any> {
 function isEmpty(input: string | null | undefined): boolean {
     return !input || input.trim().length === 0;
 
+}
+
+function getWorkingDirectory(workspace: string | undefined | null): PathOrFileDescriptor {
+    return workspace && fs.existsSync(workspace) ? workspace : process.cwd();
 }
 
 module.exports = {run};

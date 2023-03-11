@@ -60,4 +60,6 @@ jobs:
           echo "next_minor           [${{ steps.semver_info.outputs.next_minor }}]"
           echo "next_patch           [${{ steps.semver_info.outputs.next_patch }}]"
           echo "next_rc              [${{ steps.semver_info.outputs.next_rc }}]"
+          echo "version_txt          [${{ steps.semver_info.outputs.version_txt }}]"
+          echo "version_txt_path     [${{ steps.semver_info.outputs.version_txt_path }}]"
           if [ "${{ steps.semver_info.outputs.is_greater_a }}" != "false" ]; then echo "Unexpected validation result [${{ steps.semver_info.outputs.is_greater_a }}] should have been false"; exit 1; fi

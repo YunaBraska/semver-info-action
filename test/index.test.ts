@@ -1,17 +1,21 @@
+const path = require('path');
+
 const main = require('../src/index');
 type ResultTypeTest = string | number | boolean | null;
 
 test('All null parameters', () => {
-    let result = main.run(null, null, null, null, null, null);
+    let result = main.run(null, null, null, null, null, null, null);
     for (const [key, value] of result) {
-        let actual = value === null || value === false;
-        expect(actual).toBe(true);
+        if (!key.startsWith("version_txt")) {
+            let actual = value === null || value === false;
+            expect(actual).toBe(true);
+        }
     }
 });
 
 
 test('test input with [greater, lower, next major, minor, patch, release]', () => {
-    let result = main.run('  =v1.2.3-rc.4   ', '  =v5.6.7-rc.8   ', null, null, null, null);
+    let result = main.run(null, '  =v1.2.3-rc.4   ', '  =v5.6.7-rc.8   ', null, null, null, null);
     expect(result.get('original-semver-a')).toEqual('  =v1.2.3-rc.4   ');
     expect(result.get('original-semver-b')).toEqual('  =v5.6.7-rc.8   ');
     expect(result.get('fallBack-semver-a')).toBeNull();
@@ -20,7 +24,7 @@ test('test input with [greater, lower, next major, minor, patch, release]', () =
 });
 
 test('test fallback with [greater, lower, next major, minor, patch, release]', () => {
-    let result = main.run(null, null, '  =v1.2.3-rc.4   ', '  =v5.6.7-rc.8   ', null, null);
+    let result = main.run(null, null, null, '  =v1.2.3-rc.4   ', '  =v5.6.7-rc.8   ', null, null);
     expect(result.get('original-semver-a')).toBeNull();
     expect(result.get('original-semver-b')).toBeNull();
     expect(result.get('fallBack-semver-a')).toBe('  =v1.2.3-rc.4   ');
@@ -29,15 +33,15 @@ test('test fallback with [greater, lower, next major, minor, patch, release]', (
 });
 
 test('test is stable', () => {
-    let result = main.run('1.2.3-rc.4', '1.2.3', null, null, null, null);
+    let result = main.run(null, '1.2.3-rc.4', '1.2.3', null, null, null, null);
     expect(result.get('is_stable')).toBeTruthy()
     expect(result.get('is_stable_a')).toBeFalsy()
     expect(result.get('is_stable_b')).toBeTruthy()
-    expect(main.run('0.0.1', null, null, null, null, null).get('is_stable')).toBeFalsy()
+    expect(main.run(null, '0.0.1', null, null, null, null, null).get('is_stable')).toBeFalsy()
 });
 
 test('test increase', () => {
-    let result = main.run('  =v1.2.3-rc.4   ', null, null, '  =v5.6.7-rc.8   ', 'major', 'patch');
+    let result = main.run(null, '  =v1.2.3-rc.4   ', null, null, '  =v5.6.7-rc.8   ', 'major', 'patch');
     expect(result.get('clean_semver')).toBe('5.6.7');
     expect(result.get('clean_semver_a')).toBe('2.0.0');
     expect(result.get('clean_semver_b')).toBe('5.6.7');
@@ -45,7 +49,7 @@ test('test increase', () => {
 });
 
 test('test increase with null', () => {
-    let result = main.run(null, null, null, null, 'major', 'patch');
+    let result = main.run(null, null, null, null, null, 'major', 'patch');
     expect(result.get('clean_semver')).toBe('1.0.0');
     expect(result.get('clean_semver_a')).toBe('1.0.0');
     expect(result.get('clean_semver_b')).toBe('0.0.1');
@@ -53,7 +57,7 @@ test('test increase with null', () => {
 });
 
 test('test with one semver [greater, lower, next major, minor, patch, release]', () => {
-    let result = main.run('1.2.3-rc.4+build.567', null, null, null, null, null);
+    let result = main.run(null, '1.2.3-rc.4+build.567', null, null, null, null, null);
     expect(result.get('original-semver-a')).toEqual('1.2.3-rc.4+build.567');
     expect(result.get('original-semver-b')).toBeNull();
     expect(result.get('fallBack-semver-a')).toBeNull();
@@ -145,6 +149,24 @@ function expectAllFields(result: Map<string, ResultTypeTest>) {
     expect(result.get('next_rc_a')).toEqual('1.2.3-rc.5')
     expect(result.get('next_rc_b')).toEqual('5.6.7-rc.9')
 }
+
+test('Find version from version.txt', () => {
+    let result_src = main.run(path.join(__dirname, 'resources/dir_with_version'), null, null, null, null, null, null);
+    expect(result_src.get('version_txt')).toEqual("1.2.3")
+    expect(result_src.get('version_txt_path')).toContain("test/resources/dir_with_version/version.txt")
+});
+
+test('Find no version.txt file', () => {
+    let result_src = main.run(path.join(__dirname, 'resources/dir_without_version'), null, null, null, null, null, null);
+    expect(result_src.get('version_txt')).toBeNull()
+    expect(result_src.get('version_txt_path')).toBeNull()
+});
+
+test('Find version with invalid dir should use current dir', () => {
+    let result_src = main.run(path.join(__dirname, 'resources/invalidDir'), null, null, null, null, null, null);
+    expect(result_src.get('version_txt')).toEqual("1.2.3")
+    expect(result_src.get('version_txt_path')).toContain("test/resources/dir_with_version/version.txt")
+});
 
 
 
