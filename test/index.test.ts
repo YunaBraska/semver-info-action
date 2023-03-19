@@ -153,7 +153,7 @@ function expectAllFields(result: Map<string, ResultTypeTest>) {
 test('Find version from version.txt', () => {
     let result_src = main.run(path.join(__dirname, 'resources/dir_with_version'), null, null, null, null, null, null);
     expect(result_src.get('version_txt')).toEqual("1.2.3");
-    expect(result_src.get('version_txt_path')).toContain("test/resources/dir_with_version/version.txt");
+    expect(result_src.get('version_txt_path')).toContain(toWindowsUrl("test/resources/dir_with_version/version.txt"));
 });
 
 test('Find no version.txt file', () => {
@@ -165,8 +165,12 @@ test('Find no version.txt file', () => {
 test('Find version with invalid dir should use current dir', () => {
     let result_src = main.run(path.join(__dirname, 'resources/invalidDir'), null, null, null, null, null, null);
     expect(result_src.get('version_txt')).not.toBeNull();
-    expect(result_src.get('version_txt_path')).toContain("semver-info-action/version.txt");
+    expect(result_src.get('version_txt_path')).toContain(toWindowsUrl("semver-info-action/version.txt"));
 });
+
+function toWindowsUrl(url: string): string {
+    return process.platform === "win32" ? url.replace(/\//g, '\\') : url;
+}
 
 
 
