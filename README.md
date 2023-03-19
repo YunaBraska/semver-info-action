@@ -72,6 +72,7 @@ compatibility, making software release management a breeze!
 | is_smaller_a      | true                 | false   | Whether A is smaller than B                                                               |
 | is_greater_b      | true                 | false   | Whether B is greater than A                                                               |
 | is_smaller_b      | false                | false   | Whether B is smaller than A                                                               |
+| change_type       | major                | null    | Diff A and B change \[major, minor, patch, rc]                                            |
 | is_major_change   | true                 | false   | If diff A and B is a major change                                                         |
 | is_minor_change   | false                | false   | If diff A and B is a minor change                                                         |
 | is_patch_change   | false                | false   | If diff A and B is a patch change                                                         |

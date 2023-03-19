@@ -40,6 +40,8 @@ outputs:
     description: 'Whether B is greater than A'
   is_smaller_b:
     description: 'Whether B is smaller than A'
+  change_type:
+    description: 'Diff A and B change [major, minor, patch, rc]'
   is_major_change:
     description: 'If diff A and B is a major change'
   is_minor_change:
