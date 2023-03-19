@@ -102,6 +102,7 @@ test('test with one semver [greater, lower, next major, minor, patch, release]',
     expect(result.get('next_rc')).toEqual('1.2.3-rc.5');
     expect(result.get('next_rc_a')).toEqual('1.2.3-rc.5');
     expect(result.get('next_rc_b')).toBeNull();
+    expect(result.get('change_type')).toBeNull();
 });
 
 function expectAllFields(result: Map<string, ResultTypeTest>) {
@@ -148,27 +149,62 @@ function expectAllFields(result: Map<string, ResultTypeTest>) {
     expect(result.get('next_rc')).toEqual('5.6.7-rc.9');
     expect(result.get('next_rc_a')).toEqual('1.2.3-rc.5');
     expect(result.get('next_rc_b')).toEqual('5.6.7-rc.9');
+    expect(result.get('change_type')).toEqual('major');
 }
 
 test('Find version from version.txt', () => {
-    let result_src = main.run(path.join(__dirname, 'resources/dir_with_version'), null, null, null, null, null, null);
-    expect(result_src.get('version_txt')).toEqual("1.2.3");
-    expect(result_src.get('version_txt_path')).toContain(toWindowsUrl("test/resources/dir_with_version/version.txt"));
+    let result = main.run(path.join(__dirname, 'resources/dir_with_version'), null, null, null, null, null, null);
+    expect(result.get('version_txt')).toEqual("1.2.3");
+    expect(result.get('version_txt_path')).toContain(addWinSupport("test/resources/dir_with_version/version.txt"));
 });
 
 test('Find no version.txt file', () => {
-    let result_src = main.run(path.join(__dirname, 'resources/dir_without_version'), null, null, null, null, null, null);
-    expect(result_src.get('version_txt')).toBeNull();
-    expect(result_src.get('version_txt_path')).toBeNull();
+    let result = main.run(path.join(__dirname, 'resources/dir_without_version'), null, null, null, null, null, null);
+    expect(result.get('version_txt')).toBeNull();
+    expect(result.get('version_txt_path')).toBeNull();
 });
 
 test('Find version with invalid dir should use current dir', () => {
-    let result_src = main.run(path.join(__dirname, 'resources/invalidDir'), null, null, null, null, null, null);
-    expect(result_src.get('version_txt')).not.toBeNull();
-    expect(result_src.get('version_txt_path')).toContain(toWindowsUrl("semver-info-action/version.txt"));
+    let result = main.run(path.join(__dirname, 'resources/invalidDir'), null, null, null, null, null, null);
+    expect(result.get('version_txt')).not.toBeNull();
+    expect(result.get('version_txt_path')).toContain(addWinSupport("semver-info-action/version.txt"));
 });
 
-function toWindowsUrl(url: string): string {
+test('Test ChangeType', () => {
+    let result_major = main.run(null, '2.2.3-rc.4+build.667', '1.2.3-rc.4+build.567', null, null, null, null);
+    expect(result_major.get('change_type')).toEqual('major');
+
+    let result_minor = main.run(null, '1.3.3-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null);
+    expect(result_minor.get('change_type')).toEqual('minor');
+
+    let result_patch = main.run(null, '1.2.4-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null);
+    expect(result_patch.get('change_type')).toEqual('patch');
+
+    let result_rc = main.run(null, '1.2.3-rc.5+build.567', '1.2.3-rc.4+build.567', null, null, null, null);
+    expect(result_rc.get('change_type')).toEqual('rc');
+
+    let result_no_change = main.run(null, '1.2.3-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null);
+    expect(result_no_change.get('change_type')).toBeNull();
+});
+
+test('Test Increase Version', () => {
+    let result_major = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'major', null);
+    expect(result_major.get('clean_semver')).toEqual('2.0.0');
+
+    let result_minor = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'minor', null);
+    expect(result_minor.get('clean_semver')).toEqual('1.3.0');
+
+    let result_patch = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'patch', null);
+    expect(result_patch.get('clean_semver')).toEqual('1.2.3');
+
+    let result_rc = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'rc', null);
+    expect(result_rc.get('clean_semver')).toEqual('1.2.3-rc.5');
+
+    let result_null = main.run(null, null, null, null, null, 'rc', null);
+    expect(result_null.get('clean_semver')).toEqual('0.0.1-rc.0');
+});
+
+function addWinSupport(url: string): string {
     return process.platform === "win32" ? url.replace(/\//g, '\\') : url;
 }
 

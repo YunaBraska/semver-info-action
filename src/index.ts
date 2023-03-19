@@ -7,7 +7,7 @@ const S_MAJOR_2 = 'premajor';
 const S_MINOR_1 = 'minor';
 const S_MINOR_2 = 'preminor';
 const S_PATCH_1 = 'patch';
-const S_PATCH_2 = 'prpatch';
+const S_PATCH_2 = 'prepatch';
 const S_RC_1 = 'rc';
 const S_RC_2 = 'prerelease';
 
@@ -129,8 +129,24 @@ function calcDiffs(result: Map<string, ResultType>, semverA: string | null, semv
     result.set(`is_${S_MINOR_1}_change`, diff === S_MINOR_1 || diff === S_MINOR_2);
     result.set(`is_${S_PATCH_1}_change`, diff === S_PATCH_1 || diff === S_PATCH_2);
     result.set(`is_${S_RC_1}_change`, diff === S_RC_1 || diff === S_RC_2);
+    addChangeType(result, diff);
     calcDefaults(result, '', (isValidA || isValidB ? versionBig : ''), isValidA || isValidB);
 }
+
+function addChangeType(result: Map<string, ResultType>, diff: any) {
+    if (diff === S_MAJOR_1 || diff === S_MAJOR_2) {
+        result.set(`change_type`, S_MAJOR_1)
+    } else if (diff === S_MINOR_1 || diff === S_MINOR_2) {
+        result.set(`change_type`, S_MINOR_1)
+    } else if (diff === S_PATCH_1 || diff === S_PATCH_2) {
+        result.set(`change_type`, S_PATCH_1)
+    } else if (diff === S_RC_1 || diff === S_RC_2) {
+        result.set(`change_type`, S_RC_1)
+    } else {
+        result.set(`change_type`, null)
+    }
+}
+
 
 function sortMap(input: Map<string, any>): Map<string, any> {
     const sortedEntries = Array.from(input.entries()).sort((a, b) => a[0].localeCompare(b[0]));
