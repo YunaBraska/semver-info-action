@@ -167,7 +167,7 @@ test('Find no version.txt file', () => {
 test('Find version with invalid dir should use current dir', () => {
     let result = main.run(path.join(__dirname, 'resources/invalidDir'), null, null, null, null, null, null);
     expect(result.get('version_txt')).not.toBeNull();
-    expect(result.get('version_txt_path')).toContain(addWinSupport("semver-info-action/version.txt"));
+    expect(result.get('version_txt_path')).toContain(addWinSupport("test/resources/dir_with_version/version.txt"));
 });
 
 test('Test ChangeType', () => {
