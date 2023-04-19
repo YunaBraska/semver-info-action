@@ -25,6 +25,10 @@ inputs:
     description: 'Increase version B before processing [major, minor, patch, rc]'
     required: false
     default: ''
+  null-to-empty:
+    description: 'converts null to empty string'
+    required: false
+    default: 'true'
 outputs:
   clean_semver:
     description: 'The cleaned and normalized version without any prefix (highest semver wins)'

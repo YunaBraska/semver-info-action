@@ -4,7 +4,7 @@ const main = require('../src/index');
 type ResultTypeTest = string | number | boolean | null;
 
 test('All null parameters', () => {
-    let result = main.run(null, null, null, null, null, null, null);
+    let result = main.run(null, null, null, null, null, null, null, false);
     for (const [key, value] of result) {
         if (!key.startsWith("version_txt")) {
             let actual = value === null || value === false;
@@ -14,17 +14,28 @@ test('All null parameters', () => {
 });
 
 
+test('test input with [greater, lower, next major, minor, patch, release] && null or empty', () => {
+    let result = main.run(null, '  =v1.2.3-rc.4   ', '  =v5.6.7-rc.8   ', null, null, null, null, true);
+    expect(result.get('original-semver-a')).toEqual('  =v1.2.3-rc.4   ');
+    expect(result.get('original-semver-b')).toEqual('  =v5.6.7-rc.8   ');
+    expect(result.get('fallBack-semver-a')).toEqual('');
+    expect(result.get('fallBack-semver-b')).toEqual('');
+    expect(result.get('null-to-empty')).toEqual(true);
+    expectAllFields(result);
+});
+
 test('test input with [greater, lower, next major, minor, patch, release]', () => {
-    let result = main.run(null, '  =v1.2.3-rc.4   ', '  =v5.6.7-rc.8   ', null, null, null, null);
+    let result = main.run(null, '  =v1.2.3-rc.4   ', '  =v5.6.7-rc.8   ', null, null, null, null, false);
     expect(result.get('original-semver-a')).toEqual('  =v1.2.3-rc.4   ');
     expect(result.get('original-semver-b')).toEqual('  =v5.6.7-rc.8   ');
     expect(result.get('fallBack-semver-a')).toBeNull();
     expect(result.get('fallBack-semver-b')).toBeNull();
+    expect(result.get('null-to-empty')).toEqual(false);
     expectAllFields(result);
 });
 
 test('test fallback with [greater, lower, next major, minor, patch, release]', () => {
-    let result = main.run(null, null, null, '  =v1.2.3-rc.4   ', '  =v5.6.7-rc.8   ', null, null);
+    let result = main.run(null, null, null, '  =v1.2.3-rc.4   ', '  =v5.6.7-rc.8   ', null, null, false);
     expect(result.get('original-semver-a')).toBeNull();
     expect(result.get('original-semver-b')).toBeNull();
     expect(result.get('fallBack-semver-a')).toBe('  =v1.2.3-rc.4   ');
@@ -33,15 +44,15 @@ test('test fallback with [greater, lower, next major, minor, patch, release]', (
 });
 
 test('test is stable', () => {
-    let result = main.run(null, '1.2.3-rc.4', '1.2.3', null, null, null, null);
+    let result = main.run(null, '1.2.3-rc.4', '1.2.3', null, null, null, null, false);
     expect(result.get('is_stable')).toBeTruthy();
     expect(result.get('is_stable_a')).toBeFalsy();
     expect(result.get('is_stable_b')).toBeTruthy();
-    expect(main.run(null, '0.0.1', null, null, null, null, null).get('is_stable')).toBeFalsy();
+    expect(main.run(null, '0.0.1', null, null, null, null, null, false).get('is_stable')).toBeFalsy();
 });
 
 test('test increase', () => {
-    let result = main.run(null, '  =v1.2.3-rc.4   ', null, null, '  =v5.6.7-rc.8   ', 'major', 'patch');
+    let result = main.run(null, '  =v1.2.3-rc.4   ', null, null, '  =v5.6.7-rc.8   ', 'major', 'patch', false);
     expect(result.get('clean_semver')).toBe('5.6.7');
     expect(result.get('clean_semver_a')).toBe('2.0.0');
     expect(result.get('clean_semver_b')).toBe('5.6.7');
@@ -49,7 +60,7 @@ test('test increase', () => {
 });
 
 test('test increase with null', () => {
-    let result = main.run(null, null, null, null, null, 'major', 'patch');
+    let result = main.run(null, null, null, null, null, 'major', 'patch', false);
     expect(result.get('clean_semver')).toBe('1.0.0');
     expect(result.get('clean_semver_a')).toBe('1.0.0');
     expect(result.get('clean_semver_b')).toBe('0.0.1');
@@ -57,7 +68,7 @@ test('test increase with null', () => {
 });
 
 test('test with one semver [greater, lower, next major, minor, patch, release]', () => {
-    let result = main.run(null, '1.2.3-rc.4+build.567', null, null, null, null, null);
+    let result = main.run(null, '1.2.3-rc.4+build.567', null, null, null, null, null, false);
     expect(result.get('original-semver-a')).toEqual('1.2.3-rc.4+build.567');
     expect(result.get('original-semver-b')).toBeNull();
     expect(result.get('fallBack-semver-a')).toBeNull();
@@ -153,54 +164,54 @@ function expectAllFields(result: Map<string, ResultTypeTest>) {
 }
 
 test('Find version from version.txt', () => {
-    let result = main.run(path.join(__dirname, 'resources/dir_with_version'), null, null, null, null, null, null);
+    let result = main.run(path.join(__dirname, 'resources/dir_with_version'), null, null, null, null, null, null, false);
     expect(result.get('version_txt')).toEqual("1.2.3");
     expect(result.get('version_txt_path')).toContain(addWinSupport("test/resources/dir_with_version/version.txt"));
 });
 
 test('Find no version.txt file', () => {
-    let result = main.run(path.join(__dirname, 'resources/dir_without_version'), null, null, null, null, null, null);
+    let result = main.run(path.join(__dirname, 'resources/dir_without_version'), null, null, null, null, null, null, false);
     expect(result.get('version_txt')).toBeNull();
     expect(result.get('version_txt_path')).toBeNull();
 });
 
 test('Find version with invalid dir should use current dir', () => {
-    let result = main.run(path.join(__dirname, 'resources/invalidDir'), null, null, null, null, null, null);
+    let result = main.run(path.join(__dirname, 'resources/invalidDir'), null, null, null, null, null, null, false);
     expect(result.get('version_txt')).not.toBeNull();
     expect(result.get('version_txt_path')).toContain(addWinSupport("test/resources/dir_with_version/version.txt"));
 });
 
 test('Test ChangeType', () => {
-    let result_major = main.run(null, '2.2.3-rc.4+build.667', '1.2.3-rc.4+build.567', null, null, null, null);
+    let result_major = main.run(null, '2.2.3-rc.4+build.667', '1.2.3-rc.4+build.567', null, null, null, null, false);
     expect(result_major.get('change_type')).toEqual('major');
 
-    let result_minor = main.run(null, '1.3.3-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null);
+    let result_minor = main.run(null, '1.3.3-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false);
     expect(result_minor.get('change_type')).toEqual('minor');
 
-    let result_patch = main.run(null, '1.2.4-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null);
+    let result_patch = main.run(null, '1.2.4-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false);
     expect(result_patch.get('change_type')).toEqual('patch');
 
-    let result_rc = main.run(null, '1.2.3-rc.5+build.567', '1.2.3-rc.4+build.567', null, null, null, null);
+    let result_rc = main.run(null, '1.2.3-rc.5+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false);
     expect(result_rc.get('change_type')).toEqual('rc');
 
-    let result_no_change = main.run(null, '1.2.3-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null);
+    let result_no_change = main.run(null, '1.2.3-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false);
     expect(result_no_change.get('change_type')).toBeNull();
 });
 
 test('Test Increase Version', () => {
-    let result_major = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'major', null);
+    let result_major = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'major', null, false);
     expect(result_major.get('clean_semver')).toEqual('2.0.0');
 
-    let result_minor = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'minor', null);
+    let result_minor = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'minor', null, false);
     expect(result_minor.get('clean_semver')).toEqual('1.3.0');
 
-    let result_patch = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'patch', null);
+    let result_patch = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'patch', null, false);
     expect(result_patch.get('clean_semver')).toEqual('1.2.3');
 
-    let result_rc = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'rc', null);
+    let result_rc = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'rc', null, false);
     expect(result_rc.get('clean_semver')).toEqual('1.2.3-rc.5');
 
-    let result_null = main.run(null, null, null, null, null, 'rc', null);
+    let result_null = main.run(null, null, null, null, null, 'rc', null, false);
     expect(result_null.get('clean_semver')).toEqual('0.0.1-rc.0');
 });
 
