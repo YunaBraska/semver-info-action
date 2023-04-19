@@ -1,6 +1,8 @@
 //https://github.com/actions/toolkit/tree/main/packages/
 import {processVersionFile} from "./version_file";
 import fs, {PathOrFileDescriptor} from "fs";
+import {updateBadges} from "./badges_shield_updater";
+import {replaceNullWithEmptyMap} from "./common_processing";
 
 const S_MAJOR_1 = 'major';
 const S_MAJOR_2 = 'premajor';
@@ -23,8 +25,9 @@ try {
     let fallBackSemverB = core.getInput('fallback-semver-b') || null;
     let increaseA = core.getInput('increase-a') || null;
     let increaseB = core.getInput('increase-b') || null;
+    let nullToEmpty = core.getInput('null-to-empty') || null;
 
-    let result = run(workDir, semverA, semverB, fallBackSemverA, fallBackSemverB, increaseA, increaseB);
+    let result = run(workDir, semverA, semverB, fallBackSemverA, fallBackSemverB, increaseA, increaseB, !isEmpty(nullToEmpty) ? nullToEmpty.toLowerCase() === 'true' : true);
 
     console.log(JSON.stringify(Object.fromEntries(result), null, 4));
 
@@ -39,7 +42,7 @@ try {
     }
 }
 
-function run(workDir: PathOrFileDescriptor, orgSemverA: string, orgSemverB: string, fallBackSemverA: string, fallBackSemverB: string, increaseA: string, increaseB: string): Map<string, ResultType> {
+function run(workDir: PathOrFileDescriptor, orgSemverA: string, orgSemverB: string, fallBackSemverA: string, fallBackSemverB: string, increaseA: string, increaseB: string, nullToEmpty: boolean): Map<string, ResultType> {
     //DEFAULTS
     if (!workDir || workDir === "." || !fs.existsSync(workDir.toString())) {
         workDir = getWorkingDirectory(process.env['GITHUB_WORKSPACE']?.toString() || null);
@@ -52,6 +55,7 @@ function run(workDir: PathOrFileDescriptor, orgSemverA: string, orgSemverB: stri
     result.set('original-semver-b', orgSemverB);
     result.set('fallBack-semver-a', fallBackSemverA);
     result.set('fallBack-semver-b', fallBackSemverB);
+    result.set('null-to-empty', nullToEmpty);
 
     //COMMONS
     processVersionFile(result, workDir, 10);
@@ -70,7 +74,8 @@ function run(workDir: PathOrFileDescriptor, orgSemverA: string, orgSemverB: stri
 
     //DIFF
     calcDiffs(result, semverA, semverB);
-    return sortMap(result);
+    updateBadges(result, workDir, -1);
+    return sortMap(nullToEmpty ? replaceNullWithEmptyMap(result) : result);
 }
 
 function increaseVersion(version: string | null, strategy: string | null) {

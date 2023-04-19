@@ -16,6 +16,10 @@ compatibility, making software release management a breeze!
 ![Label][label_shield]
 ![Label][node_version]
 
+### Features
+
+* update Shields/Badges see [ShieldsDemo](https://github.com/YunaBraska/git-info-action/blob/main/ShieldDemo.md)
+
 ## Usage
 
 ```yaml
@@ -60,6 +64,7 @@ compatibility, making software release management a breeze!
 | fallBack-semver-b | 0.0.1       | null    | The fallback version B in case version B is not valid           |
 | increase-a        | major       | null    | Increase version A before processing \[major, minor, patch, rc] |
 | increase-b        | patch       | null    | Increase version B before processing \[major, minor, patch, rc] |
+| null-to-empty     | true        | true    | Replaces null values with empty strings                         |
 
 ### Outputs
 
