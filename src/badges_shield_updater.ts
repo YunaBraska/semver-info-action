@@ -1,4 +1,4 @@
-import {readFileSync, writeFileSync} from "fs";
+import {PathOrFileDescriptor, readFileSync, writeFileSync} from "fs";
 import {isEmpty, listFiles, ResultType, str} from './common_processing';
 
 const REGEX_BADGE_GENERIC = /!\[c_(.*?)]\s*\(.*\/badge\/(.*?)(\?.*?)?\)/mg;
@@ -39,33 +39,36 @@ export function updateBadges(result: Map<string, ResultType>, workDir: string | 
         let content = str(fileContentOrg);
         content = content.replace(REGEX_BADGE_GENERIC, (match, key, link) => {
             // Get the value from the result map based on the captured key
-            return updateLink(key, clearKeyOrValue(str(result.get(key))), match, str(link));
+            return updateLink(file, key, clearKeyOrValue(str(result.get(key))), match, str(link));
         });
 
         // Write the updated content back to the file
         if (content !== fileContentOrg) {
             writeFileSync(file, content, 'utf-8');
+            console.debug(`Saved file [${file}]`)
         }
     });
 }
 
-function updateLink(key: string, value: string, match: string, link: string) {
+function updateLink(file: PathOrFileDescriptor, key: string, value: string, match: string, link: string) {
     let color: string;
     if (isEmpty(value)) {
-        value = 'not_available';
-        color = red;
+        // value = 'not_available';
+        // color = red;
+        //do not replace anything as it could come from a different action
     } else {
         color = orange;
         color = setColor(key, value, isEmpty(color) ? orange : color);
-    }
-
-    //format key
-    key = clearKeyOrValue(key)
-    // Replace the link with the new value
-    if (match.toLowerCase().includes('shields.io')) {
-        return match.replace(link, `${key}-${value}-${color}`);
-    } else if (match.toLowerCase().includes('badgen.net')) {
-        return match.replace(link, `${key}/${value}/${color}`);
+        //format key
+        key = clearKeyOrValue(key)
+        // Replace the link with the new value
+        if (match.toLowerCase().includes('shields.io')) {
+            console.debug(`Updated [shields.io] key [${key}] file [${file}]`)
+            return match.replace(link, `${key}-${value}-${color}`);
+        } else if (match.toLowerCase().includes('badgen.net')) {
+            console.debug(`Updated [badgen.net] key [${key}] file [${file}]`)
+            return match.replace(link, `${key}/${value}/${color}`);
+        }
     }
     return match
 }

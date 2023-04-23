@@ -126,7 +126,7 @@ compatibility, making software release management a breeze!
 
 * clean environment: `./clean_node.sh`
 * Build: `npm run build` to "compile" `index.ts` to `./lib/index.js`
-* Test: `npm run build && npm run test:coverage`
+* Test: `npm run test`
 * NodeJs 16: do not upgrade nodeJs as GitHub actions latest version is 16
 * Hint: please do not remove the node modules as they are required for custom GitHub actions :(
 
