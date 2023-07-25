@@ -138,7 +138,7 @@ outputs:
     description: 'path of version file'
 runs:
   using: 'node16'
-  main: 'lib/index.js'
+  main: 'dist/index.js'
 branding:
   icon: file-text
   color: purple
