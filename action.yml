@@ -25,6 +25,10 @@ inputs:
     description: 'Increase version B before processing [major, minor, patch, rc]'
     required: false
     default: ''
+  use-version-txt:
+    description: 'Overwrites input semver-b with the version from version.txt file - if the file exists and the version is valid'
+    required: false
+    default: 'false'
   null-to-empty:
     description: 'converts null to empty string'
     required: false

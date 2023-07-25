@@ -26,8 +26,19 @@ try {
     let increaseA = core.getInput('increase-a') || null;
     let increaseB = core.getInput('increase-b') || null;
     let nullToEmpty = core.getInput('null-to-empty') || null;
+    let useVersionTxt = core.getInput('use-version-txt') || null;
 
-    let result = run(workDir, semverA, semverB, fallBackSemverA, fallBackSemverB, increaseA, increaseB, !isEmpty(nullToEmpty) ? nullToEmpty.toLowerCase() === 'true' : true);
+    let result = run(
+        workDir,
+        semverA,
+        semverB,
+        fallBackSemverA,
+        fallBackSemverB,
+        increaseA,
+        increaseB,
+        !isEmpty(nullToEmpty) ? nullToEmpty.toLowerCase() === 'true' : true,
+        !isEmpty(useVersionTxt) ? useVersionTxt.toLowerCase() === 'true' : false,
+    );
 
     console.log(JSON.stringify(Object.fromEntries(result), null, 4));
 
@@ -42,12 +53,24 @@ try {
     }
 }
 
-function run(workDir: PathOrFileDescriptor, orgSemverA: string, orgSemverB: string, fallBackSemverA: string, fallBackSemverB: string, increaseA: string, increaseB: string, nullToEmpty: boolean): Map<string, ResultType> {
+function run(
+    workDir: PathOrFileDescriptor,
+    orgSemverA: string,
+    orgSemverB: string,
+    fallBackSemverA: string,
+    fallBackSemverB: string,
+    increaseA: string,
+    increaseB: string,
+    nullToEmpty: boolean,
+    useVersionTxt: boolean
+): Map<string, ResultType> {
     //DEFAULTS
     if (!workDir || workDir === "." || !fs.existsSync(workDir.toString())) {
         workDir = getWorkingDirectory(process.env['GITHUB_WORKSPACE']?.toString() || null);
     }
     let result = new Map<string, ResultType>();
+    let versionTxt = processVersionFile(result, workDir, 10);
+    orgSemverB = useVersionTxt && !isEmpty(semver.valid(versionTxt)) ? versionTxt! : orgSemverB;
     let semverA = increaseVersion(orgSemverA || fallBackSemverA !== null ? semver.clean(orgSemverA || fallBackSemverA) : null, increaseA);
     let semverB = increaseVersion(orgSemverB || fallBackSemverB !== null ? semver.clean(orgSemverB || fallBackSemverB) : null, increaseB);
 
@@ -58,7 +81,6 @@ function run(workDir: PathOrFileDescriptor, orgSemverA: string, orgSemverB: stri
     result.set('null-to-empty', nullToEmpty);
 
     //COMMONS
-    processVersionFile(result, workDir, 10);
     let semverMap = new Map<string, (string | null)[]>();
     semverMap.set('a', [semverA, semverB]);
     semverMap.set('b', [semverB, semverA]);
@@ -160,7 +182,6 @@ function sortMap(input: Map<string, any>): Map<string, any> {
 
 function isEmpty(input: string | null | undefined): boolean {
     return !input || input.trim().length === 0;
-
 }
 
 function getWorkingDirectory(workspace: string | undefined | null): PathOrFileDescriptor {
