@@ -56,15 +56,16 @@ compatibility, making software release management a breeze!
 
 ### Inputs
 
-| parameter         | Example     | Default | Description                                                     |
-|-------------------|-------------|---------|-----------------------------------------------------------------|
-| semver-a          | v1.2.3-rc.4 | null    | Semver A to process                                             |
-| semver-b          | v5.6.7-rc.8 | null    | Semver B to process - will be compared against the first semver |
-| fallBack-semver-a | 0.0.1       | null    | The fallback version A in case version A is not valid           |
-| fallBack-semver-b | 0.0.1       | null    | The fallback version B in case version B is not valid           |
-| increase-a        | major       | null    | Increase version A before processing \[major, minor, patch, rc] |
-| increase-b        | patch       | null    | Increase version B before processing \[major, minor, patch, rc] |
-| null-to-empty     | true        | true    | Replaces null values with empty strings                         |
+| parameter         | Example     | Default | Description                                                                                                      |
+|-------------------|-------------|---------|------------------------------------------------------------------------------------------------------------------|
+| semver-a          | v1.2.3-rc.4 | null    | Semver A to process                                                                                              |
+| semver-b          | v5.6.7-rc.8 | null    | Semver B to process - will be compared against the first semver                                                  |
+| fallBack-semver-a | 0.0.1       | null    | The fallback version A in case version A is not valid                                                            |
+| fallBack-semver-b | 0.0.1       | null    | The fallback version B in case version B is not valid                                                            |
+| increase-a        | major       | null    | Increase version A before processing \[major, minor, patch, rc]                                                  |
+| increase-b        | patch       | null    | Increase version B before processing \[major, minor, patch, rc]                                                  |
+| null-to-empty     | true        | true    | Replaces null values with empty strings                                                                          |
+| use-version-txt   | true        | false   | Overwrites input `semver-b` with the version from version.txt file - if the file exists and the version is valid |
 
 ### Outputs
 

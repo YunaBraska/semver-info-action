@@ -164,54 +164,66 @@ function expectAllFields(result: Map<string, ResultTypeTest>) {
 }
 
 test('Find version from version.txt', () => {
-    let result = main.run(path.join(__dirname, 'resources/dir_with_version'), null, null, null, null, null, null, false);
+    let result = main.run(path.join(__dirname, 'resources/dir_with_version'), null, null, null, null, null, null, false, false);
     expect(result.get('version_txt')).toEqual("1.2.3");
     expect(result.get('version_txt_path')).toContain(addWinSupport("test/resources/dir_with_version/version.txt"));
 });
 
 test('Find no version.txt file', () => {
-    let result = main.run(path.join(__dirname, 'resources/dir_without_version'), null, null, null, null, null, null, false);
+    let result = main.run(path.join(__dirname, 'resources/dir_without_version'), null, null, null, null, null, null, false, false);
     expect(result.get('version_txt')).toBeNull();
     expect(result.get('version_txt_path')).toBeNull();
 });
 
 test('Find version with invalid dir should use current dir', () => {
-    let result = main.run(path.join(__dirname, 'resources/invalidDir'), null, null, null, null, null, null, false);
+    let result = main.run(path.join(__dirname, 'resources/invalidDir'), null, null, null, null, null, null, false, false);
     expect(result.get('version_txt')).not.toBeNull();
     expect(result.get('version_txt_path')).toContain(addWinSupport("test/resources/dir_with_version/version.txt"));
 });
 
+test('Get version from version.txt instead of orgVersion', () => {
+    let result1 = main.run(path.join(__dirname, 'resources/dir_with_version'), '1.0.0', '1.1.0', null, null, 'rc', 'rc', false, true);
+    expect(result1.get('clean_semver')).toEqual("1.2.4-rc.0");
+    expect(result1.get('version_txt')).toEqual("1.2.3");
+    expect(result1.get('version_txt_path')).toContain(addWinSupport("test/resources/dir_with_version/version.txt"));
+
+    let result2 = main.run(path.join(__dirname, 'resources/dir_with_version'), '1.0.0', '1.1.0', null, null, 'rc', 'rc', false, false);
+    expect(result2.get('clean_semver')).toEqual("1.1.1-rc.0");
+    expect(result2.get('version_txt')).toEqual("1.2.3");
+    expect(result2.get('version_txt_path')).toContain(addWinSupport("test/resources/dir_with_version/version.txt"));
+});
+
 test('Test ChangeType', () => {
-    let result_major = main.run(null, '2.2.3-rc.4+build.667', '1.2.3-rc.4+build.567', null, null, null, null, false);
+    let result_major = main.run(null, '2.2.3-rc.4+build.667', '1.2.3-rc.4+build.567', null, null, null, null, false, false);
     expect(result_major.get('change_type')).toEqual('major');
 
-    let result_minor = main.run(null, '1.3.3-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false);
+    let result_minor = main.run(null, '1.3.3-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false, false);
     expect(result_minor.get('change_type')).toEqual('minor');
 
-    let result_patch = main.run(null, '1.2.4-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false);
+    let result_patch = main.run(null, '1.2.4-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false, false);
     expect(result_patch.get('change_type')).toEqual('patch');
 
-    let result_rc = main.run(null, '1.2.3-rc.5+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false);
+    let result_rc = main.run(null, '1.2.3-rc.5+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false, false);
     expect(result_rc.get('change_type')).toEqual('rc');
 
-    let result_no_change = main.run(null, '1.2.3-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false);
+    let result_no_change = main.run(null, '1.2.3-rc.4+build.567', '1.2.3-rc.4+build.567', null, null, null, null, false, false);
     expect(result_no_change.get('change_type')).toBeNull();
 });
 
 test('Test Increase Version', () => {
-    let result_major = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'major', null, false);
+    let result_major = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'major', null, false, false);
     expect(result_major.get('clean_semver')).toEqual('2.0.0');
 
-    let result_minor = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'minor', null, false);
+    let result_minor = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'minor', null, false, false);
     expect(result_minor.get('clean_semver')).toEqual('1.3.0');
 
-    let result_patch = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'patch', null, false);
+    let result_patch = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'patch', null, false, false);
     expect(result_patch.get('clean_semver')).toEqual('1.2.3');
 
-    let result_rc = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'rc', null, false);
+    let result_rc = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'rc', null, false, false);
     expect(result_rc.get('clean_semver')).toEqual('1.2.3-rc.5');
 
-    let result_null = main.run(null, null, null, null, null, 'rc', null, false);
+    let result_null = main.run(null, null, null, null, null, 'rc', null, false, false);
     expect(result_null.get('clean_semver')).toEqual('0.0.1-rc.0');
 });
 
