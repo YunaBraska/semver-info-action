@@ -137,7 +137,7 @@ outputs:
   version_txt_path:
     description: 'path of version file'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
 branding:
   icon: file-text
