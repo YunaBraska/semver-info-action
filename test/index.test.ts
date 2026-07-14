@@ -114,12 +114,27 @@ test('test with one semver [greater, lower, next major, minor, patch, release]',
     expect(result.get('next_rc_a')).toEqual('1.2.3-rc.5');
     expect(result.get('next_rc_b')).toBeNull();
     expect(result.get('change_type')).toBeNull();
+    expect(result.get('base_semver')).toEqual('1.2.3');
+    expect(result.get('base_semver_a')).toEqual('1.2.3');
+    expect(result.get('base_semver_b')).toBeNull();
+    expect(result.get('is_snapshot')).toBeFalsy();
+    expect(result.get('is_snapshot_a')).toBeFalsy();
+    expect(result.get('is_snapshot_b')).toBeFalsy();
+    expect(result.get('snapshot_semver')).toEqual('1.2.3-SNAPSHOT');
+    expect(result.get('snapshot_semver_a')).toEqual('1.2.3-SNAPSHOT');
+    expect(result.get('snapshot_semver_b')).toBeNull();
+    expect(result.get('next_snapshot')).toEqual('1.2.3-SNAPSHOT');
+    expect(result.get('next_snapshot_a')).toEqual('1.2.3-SNAPSHOT');
+    expect(result.get('next_snapshot_b')).toBeNull();
 });
 
 function expectAllFields(result: Map<string, ResultTypeTest>) {
     expect(result.get('clean_semver')).toBe('5.6.7-rc.8');
     expect(result.get('clean_semver_a')).toBe('1.2.3-rc.4');
     expect(result.get('clean_semver_b')).toBe('5.6.7-rc.8');
+    expect(result.get('base_semver')).toBe('5.6.7');
+    expect(result.get('base_semver_a')).toBe('1.2.3');
+    expect(result.get('base_semver_b')).toBe('5.6.7');
     expect(result.get('is_greater_a')).toBeFalsy();
     expect(result.get('is_smaller_a')).toBeTruthy();
     expect(result.get('is_greater_b')).toBeTruthy();
@@ -128,6 +143,9 @@ function expectAllFields(result: Map<string, ResultTypeTest>) {
     expect(result.get('is_minor_change')).toBeFalsy();
     expect(result.get('is_patch_change')).toBeFalsy();
     expect(result.get('is_rc_change')).toBeFalsy();
+    expect(result.get('is_snapshot')).toBeFalsy();
+    expect(result.get('is_snapshot_a')).toBeFalsy();
+    expect(result.get('is_snapshot_b')).toBeFalsy();
     expect(result.get('is_valid_semver')).toBeTruthy();
     expect(result.get('is_valid_semver_a')).toBeTruthy();
     expect(result.get('is_valid_semver_b')).toBeTruthy();
@@ -160,8 +178,28 @@ function expectAllFields(result: Map<string, ResultTypeTest>) {
     expect(result.get('next_rc')).toEqual('5.6.7-rc.9');
     expect(result.get('next_rc_a')).toEqual('1.2.3-rc.5');
     expect(result.get('next_rc_b')).toEqual('5.6.7-rc.9');
+    expect(result.get('snapshot_semver')).toEqual('5.6.7-SNAPSHOT');
+    expect(result.get('snapshot_semver_a')).toEqual('1.2.3-SNAPSHOT');
+    expect(result.get('snapshot_semver_b')).toEqual('5.6.7-SNAPSHOT');
+    expect(result.get('next_snapshot')).toEqual('5.6.7-SNAPSHOT');
+    expect(result.get('next_snapshot_a')).toEqual('1.2.3-SNAPSHOT');
+    expect(result.get('next_snapshot_b')).toEqual('5.6.7-SNAPSHOT');
     expect(result.get('change_type')).toEqual('major');
 }
+
+test('test snapshot normalization outputs', () => {
+    let snapshotResult = main.run(null, '0.6.3-SNAPSHOT', null, null, null, null, null, false, false);
+    expect(snapshotResult.get('base_semver')).toEqual('0.6.3');
+    expect(snapshotResult.get('is_snapshot')).toBeTruthy();
+    expect(snapshotResult.get('snapshot_semver')).toEqual('0.6.3-SNAPSHOT');
+    expect(snapshotResult.get('next_snapshot')).toEqual('0.6.3-SNAPSHOT');
+
+    let releaseResult = main.run(null, '0.6.3', null, null, null, null, null, false, false);
+    expect(releaseResult.get('base_semver')).toEqual('0.6.3');
+    expect(releaseResult.get('is_snapshot')).toBeFalsy();
+    expect(releaseResult.get('snapshot_semver')).toEqual('0.6.3-SNAPSHOT');
+    expect(releaseResult.get('next_snapshot')).toEqual('0.6.4-SNAPSHOT');
+});
 
 test('Find version from version.txt', () => {
     let result = main.run(path.join(__dirname, 'resources/dir_with_version'), null, null, null, null, null, null, false, false);
@@ -223,14 +261,25 @@ test('Test Increase Version', () => {
     let result_rc = main.run(null, '1.2.3-rc.4+build.567', null, null, null, 'rc', null, false, false);
     expect(result_rc.get('clean_semver')).toEqual('1.2.3-rc.5');
 
+    let result_snapshot = main.run(null, '0.6.3', null, null, null, 'snapshot', null, false, false);
+    expect(result_snapshot.get('clean_semver')).toEqual('0.6.4-SNAPSHOT');
+
+    let result_existing_snapshot = main.run(null, '0.6.3-SNAPSHOT', null, null, null, 'snapshot', null, false, false);
+    expect(result_existing_snapshot.get('clean_semver')).toEqual('0.6.3-SNAPSHOT');
+
+    let result_rc_to_snapshot = main.run(null, '0.6.3-rc.1', null, null, null, 'snapshot', null, false, false);
+    expect(result_rc_to_snapshot.get('clean_semver')).toEqual('0.6.3-SNAPSHOT');
+
     let result_null = main.run(null, null, null, null, null, 'rc', null, false, false);
     expect(result_null.get('clean_semver')).toEqual('0.0.1-rc.0');
+
+    let result_null_snapshot = main.run(null, null, null, null, null, 'snapshot', null, false, false);
+    expect(result_null_snapshot.get('clean_semver')).toEqual('0.0.1-SNAPSHOT');
 });
 
 function addWinSupport(url: string): string {
     return process.platform === "win32" ? url.replace(/\//g, '\\') : url;
 }
-
 
 
 

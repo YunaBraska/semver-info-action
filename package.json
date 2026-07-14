@@ -25,7 +25,8 @@
   "homepage": "https://github.com/YunaBraska/semver-info-action#readme",
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "npm-check-updates": "^16.14.20"
+    "npm-check-updates": "^16.14.20",
+    "semver": "^7.8.5"
   },
   "devDependencies": {
     "@jest/types": "^29.6.3",
