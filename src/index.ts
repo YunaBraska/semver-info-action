@@ -12,6 +12,7 @@ const S_PATCH_1 = 'patch';
 const S_PATCH_2 = 'prepatch';
 const S_RC_1 = 'rc';
 const S_RC_2 = 'prerelease';
+const S_SNAPSHOT_1 = 'snapshot';
 
 const semver = require('semver');
 const core = require('@actions/core');
@@ -122,6 +123,9 @@ function increaseVersion(version: string | null, strategy: string | null) {
         case S_RC_2:
             ver = semver.inc(ver, S_RC_2, S_RC_1);
             break;
+        case S_SNAPSHOT_1:
+            ver = nextSnapshotVersion(ver);
+            break;
         default:
             return version;
     }
@@ -129,13 +133,18 @@ function increaseVersion(version: string | null, strategy: string | null) {
 }
 
 function calcDefaults(result: Map<string, ResultType>, key: string, version: string | null, isValid: boolean) {
+    let validVersion = isValid && version !== null ? version : null;
     result.set(`clean_semver${key}`, isValid ? version : null);
+    result.set(`base_semver${key}`, validVersion !== null ? baseSemver(validVersion) : null);
     result.set(`is_valid_semver${key}`, isValid);
+    result.set(`is_snapshot${key}`, validVersion !== null && isSnapshot(validVersion));
     result.set(`is_stable${key}`, (isValid && semver.major(version) > 0 && !version?.includes('-') && !version?.includes('+')));
     result.set(`next_${S_MAJOR_1}${key}`, isValid ? semver.inc(version, S_MAJOR_1) : null);
     result.set(`next_${S_MINOR_1}${key}`, isValid ? semver.inc(version, S_MINOR_1) : null);
     result.set(`next_${S_PATCH_1}${key}`, isValid ? semver.inc(version, S_PATCH_1) : null);
     result.set(`next_${S_RC_1}${key}`, isValid ? semver.inc(version, S_RC_2, S_RC_1) : null);
+    result.set(`snapshot_semver${key}`, validVersion !== null ? snapshotSemver(validVersion) : null);
+    result.set(`next_${S_SNAPSHOT_1}${key}`, validVersion !== null ? nextSnapshotVersion(validVersion) : null);
     result.set(`${S_MAJOR_1}${key}`, isValid ? semver.major(version) : null);
     result.set(`${S_MINOR_1}${key}`, isValid ? semver.minor(version) : null);
     result.set(`${S_PATCH_1}${key}`, isValid ? semver.patch(version) : null);
@@ -182,6 +191,29 @@ function sortMap(input: Map<string, any>): Map<string, any> {
 
 function isEmpty(input: string | null | undefined): boolean {
     return !input || input.trim().length === 0;
+}
+
+function baseSemver(version: string): string {
+    return `${semver.major(version)}.${semver.minor(version)}.${semver.patch(version)}`;
+}
+
+function prereleaseTag(version: string): string | null {
+    return semver.prerelease(version)?.filter((item: number | string) => typeof item !== 'number').shift()?.toString() || null;
+}
+
+function isSnapshot(version: string): boolean {
+    return prereleaseTag(version)?.toLowerCase() === S_SNAPSHOT_1;
+}
+
+function snapshotSemver(version: string): string {
+    return `${baseSemver(version)}-SNAPSHOT`;
+}
+
+function nextSnapshotVersion(version: string): string {
+    if (isSnapshot(version) || !isEmpty(prereleaseTag(version))) {
+        return snapshotSemver(version);
+    }
+    return `${semver.inc(version, S_PATCH_1)}-SNAPSHOT`;
 }
 
 function getWorkingDirectory(workspace: string | undefined | null): PathOrFileDescriptor {

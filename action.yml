@@ -18,11 +18,11 @@ inputs:
     required: false
     default: ''
   increase-a:
-    description: 'Increase version A before processing [major, minor, patch, rc]'
+    description: 'Increase version A before processing [major, minor, patch, rc, snapshot]'
     required: false
     default: ''
   increase-b:
-    description: 'Increase version B before processing [major, minor, patch, rc]'
+    description: 'Increase version B before processing [major, minor, patch, rc, snapshot]'
     required: false
     default: ''
   use-version-txt:
@@ -40,6 +40,12 @@ outputs:
     description: 'The cleaned and normalized version A without any prefix'
   clean_semver_b:
     description: 'The cleaned and normalized version B without any prefix'
+  base_semver:
+    description: 'The base semver without pre-release or build metadata (highest semver wins)'
+  base_semver_a:
+    description: 'The base semver of A without pre-release or build metadata'
+  base_semver_b:
+    description: 'The base semver of B without pre-release or build metadata'
   is_greater_a:
     description: 'Whether A is greater than B'
   is_smaller_a:
@@ -64,6 +70,12 @@ outputs:
     description: 'Whether semver A is valid'
   is_valid_semver_b:
     description: 'Whether semver B is valid'
+  is_snapshot:
+    description: 'Whether the version is a snapshot pre-release (highest semver wins)'
+  is_snapshot_a:
+    description: 'Whether version A is a snapshot pre-release'
+  is_snapshot_b:
+    description: 'Whether version B is a snapshot pre-release'
   is_stable:
     description: 'Whether the version is stable (doesn`t contain any pre-release tag) (highest semver wins)'
   is_stable_a:
@@ -124,6 +136,18 @@ outputs:
     description: 'The next rc version of A'
   next_rc_b:
     description: 'The next rc version of B'
+  snapshot_semver:
+    description: 'The normalized snapshot version for the current semver line (highest semver wins)'
+  snapshot_semver_a:
+    description: 'The normalized snapshot version for A'
+  snapshot_semver_b:
+    description: 'The normalized snapshot version for B'
+  next_snapshot:
+    description: 'The next snapshot version of provided semver (highest semver wins)'
+  next_snapshot_a:
+    description: 'The next snapshot version of A'
+  next_snapshot_b:
+    description: 'The next snapshot version of B'
   original-semver-a:
     description: 'Semver A to process'
   original-semver-b:

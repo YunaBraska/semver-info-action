@@ -42,6 +42,8 @@ compatibility, making software release management a breeze!
 - name: "Print Semver Info"
   run: |
     echo "clean_semver         [${{ steps.semver_info.outputs.clean_semver }}]"
+    echo "base_semver          [${{ steps.semver_info.outputs.base_semver }}]"
+    echo "is_snapshot          [${{ steps.semver_info.outputs.is_snapshot }}]"
     echo "is_stable            [${{ steps.semver_info.outputs.is_stable }}]"
     echo "is_valid_semver      [${{ steps.semver_info.outputs.is_valid_semver }}]"
     echo "is_major_change      [${{ steps.semver_info.outputs.is_major_change }}]"
@@ -52,8 +54,15 @@ compatibility, making software release management a breeze!
     echo "next_minor           [${{ steps.semver_info.outputs.next_minor }}]"
     echo "next_patch           [${{ steps.semver_info.outputs.next_patch }}]"
     echo "next_rc              [${{ steps.semver_info.outputs.next_rc }}]"
+    echo "snapshot_semver      [${{ steps.semver_info.outputs.snapshot_semver }}]"
+    echo "next_snapshot        [${{ steps.semver_info.outputs.next_snapshot }}]"
 
 ```
+
+Snapshot handling:
+
+- `0.6.3-SNAPSHOT` -> `base_semver=0.6.3`, `snapshot_semver=0.6.3-SNAPSHOT`, `next_snapshot=0.6.3-SNAPSHOT`
+- `0.6.3` -> `base_semver=0.6.3`, `snapshot_semver=0.6.3-SNAPSHOT`, `next_snapshot=0.6.4-SNAPSHOT`
 
 ### Inputs
 
@@ -63,8 +72,8 @@ compatibility, making software release management a breeze!
 | semver-b          | v5.6.7-rc.8 | null    | Semver B to process - will be compared against the first semver                                                  |
 | fallBack-semver-a | 0.0.1       | null    | The fallback version A in case version A is not valid                                                            |
 | fallBack-semver-b | 0.0.1       | null    | The fallback version B in case version B is not valid                                                            |
-| increase-a        | major       | null    | Increase version A before processing \[major, minor, patch, rc]                                                  |
-| increase-b        | patch       | null    | Increase version B before processing \[major, minor, patch, rc]                                                  |
+| increase-a        | major       | null    | Increase version A before processing \[major, minor, patch, rc, snapshot]                                        |
+| increase-b        | patch       | null    | Increase version B before processing \[major, minor, patch, rc, snapshot]                                        |
 | null-to-empty     | true        | true    | Replaces null values with empty strings                                                                          |
 | use-version-txt   | true        | false   | Overwrites input `semver-b` with the version from version.txt file - if the file exists and the version is valid |
 
@@ -75,6 +84,9 @@ compatibility, making software release management a breeze!
 | clean_semver      | 5.6.7-rc.8           | null    | The cleaned and normalized version without any prefix (highest semver wins)               |
 | clean_semver_a    | 1.2.3-rc.4           | null    | The cleaned and normalized version A without any prefix                                   |
 | clean_semver_b    | 5.6.7-rc.8           | null    | The cleaned and normalized version B without any prefix                                   |
+| base_semver       | 5.6.7                | null    | The base semver without pre-release or build metadata (highest semver wins)               |
+| base_semver_a     | 1.2.3                | null    | The base semver of A without pre-release or build metadata                                |
+| base_semver_b     | 5.6.7                | null    | The base semver of B without pre-release or build metadata                                |
 | is_greater_a      | false                | false   | Whether A is greater than B                                                               |
 | is_smaller_a      | true                 | false   | Whether A is smaller than B                                                               |
 | is_greater_b      | true                 | false   | Whether B is greater than A                                                               |
@@ -87,6 +99,9 @@ compatibility, making software release management a breeze!
 | is_valid_semver   | true                 | false   | Whether the semver is valid (highest semver wins)                                         |
 | is_valid_semver_a | true                 | false   | Whether semver A is valid                                                                 |
 | is_valid_semver_b | true                 | false   | Whether semver B is valid                                                                 |
+| is_snapshot       | false                | false   | Whether the version is a snapshot pre-release (highest semver wins)                       |
+| is_snapshot_a     | false                | false   | Whether version A is a snapshot pre-release                                               |
+| is_snapshot_b     | false                | false   | Whether version B is a snapshot pre-release                                               |
 | is_stable         | false                | false   | Whether the version is stable (doesn't contain any pre-release tag) (highest semver wins) |
 | is_stable_a       | false                | false   | Whether version A is stable (doesn't contain any pre-release tag)                         |
 | is_stable_b       | false                | false   | Whether version B is stable (doesn't contain any pre-release tag)                         |
@@ -117,6 +132,12 @@ compatibility, making software release management a breeze!
 | next_rc           | 6.0.0                | null    | The next rc version of provided semver (highest semver wins)                              |
 | next_rc_a         | 2.0.0                | null    | The next rc version of A                                                                  |
 | next_rc_b         | 6.0.0                | null    | The next rc version of B                                                                  |
+| snapshot_semver   | 5.6.7-SNAPSHOT       | null    | The normalized snapshot version for the current semver line (highest semver wins)         |
+| snapshot_semver_a | 1.2.3-SNAPSHOT       | null    | The normalized snapshot version for A                                                     |
+| snapshot_semver_b | 5.6.7-SNAPSHOT       | null    | The normalized snapshot version for B                                                     |
+| next_snapshot     | 5.6.7-SNAPSHOT       | null    | The next snapshot version of provided semver (highest semver wins)                        |
+| next_snapshot_a   | 1.2.3-SNAPSHOT       | null    | The next snapshot version of A                                                            |
+| next_snapshot_b   | 5.6.7-SNAPSHOT       | null    | The next snapshot version of B                                                            |
 | original-semver-a | v1.2.3-rc.4          | null    | Semver A to process                                                                       |
 | original-semver-b | v5.6.7-rc.8          | null    | Semver B to process - will be compared with first semver                                  |
 | fallBack-semver-a | 0.0.1                | null    | The fallback version A in case the original version A is not valid                        |
